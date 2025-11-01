@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: #5ece7b;
+    --color-dark-gray: #1d1f22;
+    --font-raleway: "Raleway", sans-serif;
+    --font-roboto: "Roboto", sans-serif;
+}
+
+.container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.swiper-slide-thumb-active {
+    border: 1px solid #000;
+    padding: 2px;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    background-color: rgba(0, 0, 0, 0.3);
+    width: 40px;
+    height: 40px;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 20px !important;
+    font-weight: normal;
+}
