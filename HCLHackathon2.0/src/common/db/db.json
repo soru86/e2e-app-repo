@@ -1,0 +1,57 @@
+{
+  "_id": "ORD23456",
+  "orderReferenceNo": "ORD23456",
+  "portfolioNo": "X123",
+  "stockDetails": {
+    "stockCode": "DFM",
+    "stockName": "DFM Co.",
+    "stockValueAED": 200,
+    "createdOn": "Wed Jan 01 2025 00:00:00 GMT+0400 (Gulf Standard Time)",
+    "createdBy": "Saurabh",
+    "updatedOn": "Wed Jan 15 2025 00:00:00 GMT+0400 (Gulf Standard Time)",
+    "updatedBy": "Saurabh"
+  },
+  "orderStatus": "Pending",
+  "transactionType": "Buy",
+  "orderValueAED": 25000,
+  "createdOn": "Wed Jun 15 2025 00:00:00 GMT+0400 (Gulf Standard Time)", 
+  "createdBy": "Saurabh",
+},
+{
+  "_id": "ORD23433456",
+  "orderReferenceNo": "ORD23433456",
+  "portfolioNo": "U656",
+  "stockDetails": {
+    "stockCode": "HCL",
+    "stockName": "HCL Technologies.",
+    "stockValueAED": 250,
+    "createdOn": "Wed Jan 23 2025 00:00:00 GMT+0400 (Gulf Standard Time)",
+    "createdBy": "Saurabh",
+    "updatedOn": "Wed Jan 24 2025 00:00:00 GMT+0400 (Gulf Standard Time)",
+    "updatedBy": "Saurabh",
+  },
+  "orderStatus": "Completed",
+  "transactionType": "Buy",
+  "orderValueAED": 10000
+  "createdOn": "Wed Jun 18 2025 00:00:00 GMT+0400 (Gulf Standard Time)", 
+  "createdBy": "Saurabh",
+},
+{
+  "_id": "ORD2323456",
+  "orderReferenceNo": "ORD2323456",
+  "portfolioNo": "V5454",
+  "stockDetails": {
+    "stockCode": "ETS",
+    "stockName": "Etisalat",
+    "stockValueAED": 255,
+    "createdOn": "Wed Jan 11 2025 00:00:00 GMT+0400 (Gulf Standard Time)",
+    "createdBy": "Saurabh",
+    "updatedOn": "Wed Jan 25 2025 00:00:00 GMT+0400 (Gulf Standard Time)",
+    "updatedBy": "Saurabh"
+  },
+  "orderStatus": "Completed",
+  "transactionType": "Buy",
+  "orderValueAED": 22000
+  "createdOn": "Wed Jun 08 2025 00:00:00 GMT+0400 (Gulf Standard Time)", 
+  "createdBy": "Saurabh",
+}
