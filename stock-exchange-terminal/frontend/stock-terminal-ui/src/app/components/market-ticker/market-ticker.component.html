@@ -1,0 +1,25 @@
+<section class="card">
+  <header class="card__header">
+    <h2>Market Pulse</h2>
+  </header>
+
+  <ul class="ticker-list">
+    <li *ngFor="let ticker of tickers$ | async">
+      <div class="symbol">
+        <span>{{ ticker.symbol }}</span>
+        <small>{{ ticker.assetType }}</small>
+      </div>
+      <div class="price">
+        <strong>{{ ticker.lastPrice | number:'1.2-2' }}</strong>
+        <span [class.up]="ticker.changeAbsolute && ticker.changeAbsolute >= 0"
+              [class.down]="ticker.changeAbsolute && ticker.changeAbsolute < 0">
+          {{ ticker.changeAbsolute | number:'1.2-2' }} ({{ ticker.changePercent | number:'1.1-1' }}%)
+        </span>
+      </div>
+      <div class="timestamp">
+        {{ ticker.updatedAt | date:'shortTime' }}
+      </div>
+    </li>
+  </ul>
+</section>
+

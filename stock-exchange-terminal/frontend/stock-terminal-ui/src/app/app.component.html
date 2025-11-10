@@ -1,0 +1,25 @@
+<div class="app-shell">
+  <aside class="app-shell__aside">
+    <div class="branding">
+      <h1>SET</h1>
+      <p>Stock Exchange Terminal</p>
+    </div>
+
+    <button class="logout" *ngIf="user$ | async as user" (click)="logout()">
+      Sign out {{ user.displayName }}
+    </button>
+  </aside>
+
+  <main class="app-shell__main">
+    <section class="app-shell__content" *ngIf="user$ | async as activeUser; else auth">
+      <app-dashboard [user]="activeUser"></app-dashboard>
+    </section>
+
+    <ng-template #auth>
+      <div class="auth-wrapper">
+        <app-login></app-login>
+      </div>
+    </ng-template>
+  </main>
+</div>
+

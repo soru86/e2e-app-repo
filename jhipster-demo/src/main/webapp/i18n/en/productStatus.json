@@ -1,0 +1,37 @@
+{
+  "inventoryApp": {
+    "productStatus": {
+      "home": {
+        "title": "Product Statuses",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Product Status",
+        "createOrEditLabel": "Create or edit a Product Status",
+        "notFound": "No Product Statuses found"
+      },
+      "created": "A new Product Status is created with identifier {{ param }}",
+      "updated": "A Product Status is updated with identifier {{ param }}",
+      "deleted": "A Product Status is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Product Status {{ code }} (ID {{ id }})?"
+      },
+      "detail": {
+        "title": "Product Status"
+      },
+      "id": "ID",
+      "code": "Code",
+      "label": "Label",
+      "description": "Description",
+      "isDefault": "Default status",
+      "isActive": "Active",
+      "form": {
+        "codeHelp": "Unique human-readable status code (3-30 characters)",
+        "labelHelp": "Label shown to end users"
+      }
+    },
+    "ProductStatus": {
+      "AVAILABLE": "Available",
+      "OUT_OF_STOCK": "Out of stock",
+      "DISCONTINUED": "Discontinued"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "annotations": {
+    "changelogDate": "20251109164431"
+  },
+  "fields": [],
+  "name": "ProductStatus",
+  "relationships": [],
+  "searchEngine": "no",
+  "values": "AVAILABLE,OUT_OF_STOCK,DISCONTINUED"
+}

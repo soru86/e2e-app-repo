@@ -1,0 +1,126 @@
+<div>
+  <h2 id="page-heading" data-cy="ProductStatusHeading">
+    <span jhiTranslate="inventoryApp.productStatus.home.title">Product Statuses</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [spin]="isLoading"></fa-icon>
+        <span jhiTranslate="inventoryApp.productStatus.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        *jhiHasAnyAuthority="'ROLE_ADMIN'"
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-product-status"
+        [routerLink]="['/product-status/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="inventoryApp.productStatus.home.createLabel">Create a new Product Status</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error></jhi-alert-error>
+
+  <jhi-alert></jhi-alert>
+
+  @if (productStatuses?.length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="inventoryApp.productStatus.home.notFound">No Product Statuses found</span>
+    </div>
+  }
+
+  @if (productStatuses && productStatuses.length > 0) {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [sortState]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="code">
+              <div class="d-flex">
+                <span jhiTranslate="inventoryApp.productStatus.code">Code</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="label">
+              <div class="d-flex">
+                <span jhiTranslate="inventoryApp.productStatus.label">Label</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col">
+              <span jhiTranslate="inventoryApp.productStatus.description">Description</span>
+            </th>
+            <th scope="col" jhiSortBy="isDefault">
+              <div class="d-flex">
+                <span jhiTranslate="inventoryApp.productStatus.isDefault">Default status</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="isActive">
+              <div class="d-flex">
+                <span jhiTranslate="inventoryApp.productStatus.isActive">Active</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (productStatus of productStatuses; track trackId) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/product-status', productStatus.id, 'view']">{{ productStatus.id }}</a>
+              </td>
+              <td>{{ productStatus.code }}</td>
+              <td>{{ productStatus.label }}</td>
+              <td>{{ productStatus.description }}</td>
+              <td>
+                <fa-icon [icon]="productStatus.isDefault ? 'check-circle' : 'circle'"></fa-icon>
+              </td>
+              <td>
+                <fa-icon [icon]="productStatus.isActive ? 'check-circle' : 'circle'"></fa-icon>
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/product-status', productStatus.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                  </a>
+
+                  <a
+                    *jhiHasAnyAuthority="'ROLE_ADMIN'"
+                    [routerLink]="['/product-status', productStatus.id, 'edit']"
+                    class="btn btn-primary btn-sm"
+                    data-cy="entityEditButton"
+                  >
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                  </a>
+
+                  <button
+                    *jhiHasAnyAuthority="'ROLE_ADMIN'"
+                    type="submit"
+                    (click)="delete(productStatus)"
+                    class="btn btn-danger btn-sm"
+                    data-cy="entityDeleteButton"
+                  >
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

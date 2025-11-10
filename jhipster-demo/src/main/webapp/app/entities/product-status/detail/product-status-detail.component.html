@@ -1,0 +1,53 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (productStatus()) {
+      <div>
+        <h2 data-cy="productStatusDetailsHeading"><span jhiTranslate="inventoryApp.productStatus.detail.title">Product Status</span></h2>
+
+        <hr />
+
+        <jhi-alert-error></jhi-alert-error>
+
+        <jhi-alert></jhi-alert>
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ productStatus()!.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="inventoryApp.productStatus.code">Code</span></dt>
+          <dd>
+            <span>{{ productStatus()!.code }}</span>
+          </dd>
+          <dt><span jhiTranslate="inventoryApp.productStatus.label">Label</span></dt>
+          <dd>
+            <span>{{ productStatus()!.label }}</span>
+          </dd>
+          <dt><span jhiTranslate="inventoryApp.productStatus.description">Description</span></dt>
+          <dd>
+            <span>{{ productStatus()!.description }}</span>
+          </dd>
+          <dt><span jhiTranslate="inventoryApp.productStatus.isDefault">Default status</span></dt>
+          <dd>
+            <fa-icon [icon]="productStatus()!.isDefault ? 'check-circle' : 'circle'"></fa-icon>
+          </dd>
+          <dt><span jhiTranslate="inventoryApp.productStatus.isActive">Active</span></dt>
+          <dd>
+            <fa-icon [icon]="productStatus()!.isActive ? 'check-circle' : 'circle'"></fa-icon>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+        <a
+          *jhiHasAnyAuthority="'ROLE_ADMIN'"
+          [routerLink]="['/product-status', productStatus()!.id, 'edit']"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </a>
+      </div>
+    }
+  </div>
+</div>

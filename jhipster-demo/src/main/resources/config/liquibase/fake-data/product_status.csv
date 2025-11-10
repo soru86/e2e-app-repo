@@ -1,0 +1,11 @@
+id;code;label;description;is_default;is_active
+1;AVAILABLE;Available;Sellable inventory that can be promised to customers;true;true
+2;OUT_OF_STOCK;Out of Stock;Temporarily unavailable but expected to return;false;true
+3;DISCONTINUED;Discontinued;No longer sold and hidden from listings;false;false
+4;BACK_ORDERED;Back Ordered;Demand exceeds supply and requires supplier fulfilment;false;true
+5;DAMAGED;Damaged;Quarantined items pending inspection;false;false
+6;RESERVED;Reserved;Allocated to customer orders awaiting shipment;false;true
+7;IN_TRANSIT;In Transit;Inventory moving between locations;false;true
+8;AWAITING_QA;Awaiting QA;Items waiting for quality assurance checks;false;true
+9;RETURN_PENDING;Return Pending;Returned items pending inspection;false;true
+10;PREORDER;Pre-order;Products announced but not yet available;false;true

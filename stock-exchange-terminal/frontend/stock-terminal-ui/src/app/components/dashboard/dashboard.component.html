@@ -1,0 +1,15 @@
+<section class="dashboard">
+  <header class="dashboard__header">
+    <div>
+      <h1>Stock Exchange Terminal</h1>
+      <p>Signed in as {{ user.displayName }} ({{ user.email }})</p>
+    </div>
+  </header>
+
+  <div class="dashboard__grid">
+    <app-orders [user]="user"></app-orders>
+    <app-portfolio [user]="user"></app-portfolio>
+    <app-market-ticker></app-market-ticker>
+  </div>
+</section>
+

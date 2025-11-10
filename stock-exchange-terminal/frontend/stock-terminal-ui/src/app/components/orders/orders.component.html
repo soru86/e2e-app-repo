@@ -1,0 +1,87 @@
+<section class="card">
+  <header class="card__header">
+    <h2>Orders</h2>
+    <button (click)="loadOrders()" [disabled]="loading">Refresh</button>
+  </header>
+
+  <form class="order-form" [formGroup]="orderForm" (ngSubmit)="placeOrder()">
+    <div>
+      <label>Symbol</label>
+      <input formControlName="symbol" placeholder="AAPL" />
+    </div>
+    <div>
+      <label>Asset</label>
+      <select formControlName="assetType">
+        <option value="STOCK">Stock</option>
+        <option value="CRYPTO">Crypto</option>
+        <option value="ETF">ETF</option>
+        <option value="BOND">Bond</option>
+      </select>
+    </div>
+    <div>
+      <label>Side</label>
+      <select formControlName="side">
+        <option value="BUY">Buy</option>
+        <option value="SELL">Sell</option>
+      </select>
+    </div>
+    <div>
+      <label>Type</label>
+      <select formControlName="orderType">
+        <option value="MARKET">Market</option>
+        <option value="LIMIT">Limit</option>
+      </select>
+    </div>
+    <div>
+      <label>Quantity</label>
+      <input type="number" formControlName="quantity" min="1" />
+    </div>
+    <div>
+      <label>Limit Price</label>
+      <input type="number" formControlName="limitPrice" step="0.01" />
+    </div>
+    <button type="submit" [disabled]="loading">Submit Order</button>
+  </form>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="table-wrapper" *ngIf="orders.length; else emptyState">
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Side</th>
+          <th>Type</th>
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Updated</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>{{ order.symbol }}</td>
+          <td>{{ order.side }}</td>
+          <td>{{ order.orderType }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>
+            <span [class]="'status status--' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </td>
+          <td>{{ order.updatedAt | date:'short' }}</td>
+          <td>
+            <button type="button" (click)="cancel(order.orderId)" [disabled]="order.status !== 'PENDING'">
+              Cancel
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #emptyState>
+    <p class="empty">No orders yet. Place your first order above.</p>
+  </ng-template>
+</section>
+

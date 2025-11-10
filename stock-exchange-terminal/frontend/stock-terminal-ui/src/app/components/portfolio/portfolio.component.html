@@ -1,0 +1,32 @@
+<section class="card">
+  <header class="card__header">
+    <h2>Portfolio</h2>
+    <button (click)="loadPortfolio()" [disabled]="loading">Refresh</button>
+  </header>
+
+  <div *ngIf="positions.length; else emptyState">
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Asset</th>
+          <th>Quantity</th>
+          <th>Avg Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let position of positions">
+          <td>{{ position.symbol }}</td>
+          <td>{{ position.assetType }}</td>
+          <td>{{ position.quantity | number:'1.2-2' }}</td>
+          <td>{{ position.averagePrice | currency:'USD':'symbol' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #emptyState>
+    <p class="empty">No holdings yet.</p>
+  </ng-template>
+</section>
+
