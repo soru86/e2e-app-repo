@@ -127,6 +127,8 @@ frontend/
 
 This diagram shows the complete flow when a user places an order, demonstrating the event sourcing pattern where domain events are persisted to the event store.
 
+<img width="2723" height="1709" alt="image" src="https://github.com/user-attachments/assets/17d985fc-f108-4883-8e21-3e42230d92aa" />
+
 ```plantuml
 @startuml Place Order Command Flow
 !theme plain
