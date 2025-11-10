@@ -424,6 +424,8 @@ end note
 
 This diagram shows the cancel order flow, which follows the same event sourcing pattern as placing an order.
 
+<img width="2993" height="2898" alt="image" src="https://github.com/user-attachments/assets/27451463-fad2-4798-b7fc-1676aab697de" />
+
 ```plantuml
 @startuml Cancel Order Command Flow
 !theme plain
