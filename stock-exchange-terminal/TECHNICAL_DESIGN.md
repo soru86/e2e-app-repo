@@ -121,34 +121,421 @@ frontend/
 2. `MarketDataGeneratorService` emits randomized `TickerSnapshot` every two seconds using `Sinks.many().multicast()` and `Flux.interval`.
 3. Angular merges new tickers into `BehaviorSubject` for live updates in `MarketTickerComponent`.
 
-## 7. Sequence Diagrams (Textual)
+## 7. Sequence Diagrams (PlantUML)
 
-### Place Order
-```
-OrdersComponent -> OrderService.placeOrder()
-OrderService -> trading-command-service /api/commands/orders
-OrderCommandController -> OrderCommandService.handle(command)
-OrderCommandService -> EventStore.loadEvents(orderId)
-EventStore -> StoredEventRepository.findByAggregateIdOrderBySequenceNumber(...)
-OrderAggregate.handle -> emits OrderPlacedEvent
-OrderCommandService -> EventStore.append(event)
-EventStore -> StoredEventRepository.save(event)
-EventStore -> EventEnvelope returned
-Controller -> Angular response (orderId + events)
+### 7.1 Place Order Command Flow (CQRS Write Path)
+
+This diagram shows the complete flow when a user places an order, demonstrating the event sourcing pattern where domain events are persisted to the event store.
+
+```plantuml
+@startuml Place Order Command Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+
+actor User as user
+participant "OrdersComponent\n(Angular)" as ordersComp
+participant "OrderService\n(Angular)" as orderService
+participant "OrderCommandController\n(Spring Boot)" as controller
+participant "OrderCommandService\n(Spring Boot)" as commandService
+participant "EventStore\n(Interface)" as eventStore
+participant "JpaEventStore\n(Implementation)" as jpaEventStore
+participant "StoredEventRepository\n(JPA)" as eventRepo
+database "H2 Event Store\n(stored_events table)" as eventDb
+participant "OrderAggregate\n(Domain)" as aggregate
+
+user -> ordersComp: Fill order form & submit
+activate ordersComp
+ordersComp -> ordersComp: Validate form (symbol, quantity, etc.)
+ordersComp -> orderService: placeOrder(payload)
+activate orderService
+orderService -> controller: POST /api/commands/orders\n{PlaceOrderPayload}
+activate controller
+controller -> controller: Build PlaceOrderCommand\nfrom payload
+controller -> commandService: handle(PlaceOrderCommand)
+activate commandService
+
+commandService -> eventStore: loadEvents(aggregateId)
+activate eventStore
+eventStore -> jpaEventStore: loadEvents(aggregateId)
+activate jpaEventStore
+jpaEventStore -> eventRepo: findByAggregateIdOrderBySequenceNumber(aggregateId)
+activate eventRepo
+eventRepo -> eventDb: SELECT * FROM stored_events\nWHERE aggregateId = ?
+activate eventDb
+eventDb --> eventRepo: List<StoredEvent>
+deactivate eventDb
+eventRepo --> jpaEventStore: List<StoredEvent>
+deactivate eventRepo
+jpaEventStore -> jpaEventStore: Deserialize to DomainEvent list
+jpaEventStore --> eventStore: List<DomainEvent>
+deactivate jpaEventStore
+eventStore --> commandService: List<DomainEvent> (past events)
+deactivate eventStore
+
+commandService -> aggregate: rehydrate(pastEvents)
+activate aggregate
+aggregate -> aggregate: Apply past events to rebuild state
+aggregate --> commandService: OrderAggregate (rehydrated)
+deactivate aggregate
+
+commandService -> aggregate: handle(PlaceOrderCommand)
+activate aggregate
+aggregate -> aggregate: Validate business rules\n(check limit price, duplicate order, etc.)
+aggregate -> aggregate: Create OrderPlacedEvent
+aggregate --> commandService: List<DomainEvent> (new events)
+deactivate aggregate
+
+commandService -> commandService: persistEvents(newEvents)
+loop For each DomainEvent
+    commandService -> eventStore: append(DomainEvent)
+    activate eventStore
+    eventStore -> jpaEventStore: append(event)
+    activate jpaEventStore
+    jpaEventStore -> jpaEventStore: Serialize event to JSON\nGenerate sequence number
+    jpaEventStore -> eventRepo: save(StoredEvent)
+    activate eventRepo
+    eventRepo -> eventDb: INSERT INTO stored_events\n(sequenceNumber, aggregateId, eventId, type, payload, occurredOn)
+    activate eventDb
+    eventDb --> eventRepo: StoredEvent (saved)
+    deactivate eventDb
+    eventRepo --> jpaEventStore: StoredEvent
+    deactivate eventRepo
+    jpaEventStore -> jpaEventStore: Create EventEnvelope
+    jpaEventStore --> eventStore: EventEnvelope
+    deactivate jpaEventStore
+    eventStore --> commandService: EventEnvelope
+    deactivate eventStore
+end
+
+commandService --> controller: List<EventEnvelope>
+deactivate commandService
+controller -> controller: Extract orderId from envelope
+controller --> orderService: HTTP 200 {orderId, events}
+deactivate controller
+orderService --> ordersComp: Observable<OrderResponse>
+deactivate orderService
+ordersComp -> ordersComp: Show success message\nRefresh order list
+ordersComp --> user: Order placed successfully
+deactivate ordersComp
+
+note right of eventDb
+  Event is now persisted
+  and available for:
+  - Projection engine
+  - Event replay
+  - Audit trail
+end note
+
+@enduml
 ```
 
-### Projection Engine
+### 7.2 Query Orders/Portfolio Flow (CQRS Read Path)
+
+This diagram shows how the query side works, including the asynchronous projection engine that materializes events into read models, and how the frontend queries these optimized views.
+
+```plantuml
+@startuml Query Flow with Projection
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+
+actor User as user
+participant "DashboardComponent\n(Angular)" as dashboard
+participant "OrderService\n(Angular)" as orderService
+participant "PortfolioService\n(Angular)" as portfolioService
+participant "OrderQueryController\n(Spring Boot)" as orderController
+participant "PortfolioQueryController\n(Spring Boot)" as portfolioController
+participant "OrderSummaryViewRepository\n(JPA)" as orderRepo
+participant "PortfolioPositionViewRepository\n(JPA)" as portfolioRepo
+database "H2 Query Views\n(order_summary_view,\nportfolio_position_view)" as queryDb
+participant "EventProjectionEngine\n(Scheduled)" as projectionEngine
+participant "StoredEventRepository\n(JPA)" as eventRepo
+participant "ProjectionOffsetRepository\n(JPA)" as offsetRepo
+database "H2 Event Store\n(stored_events table)" as eventDb
+participant "EventMapper" as eventMapper
+
+== Asynchronous Projection (Background Process) ==
+
+loop Every 1 second (scheduled)
+    projectionEngine -> projectionEngine: @Scheduled project()
+    activate projectionEngine
+    
+    projectionEngine -> offsetRepo: findById("order-projection")
+    activate offsetRepo
+    offsetRepo --> projectionEngine: ProjectionOffset (lastSequence)
+    deactivate offsetRepo
+    
+    projectionEngine -> eventRepo: findAfter(lastSequenceCached)
+    activate eventRepo
+    eventRepo -> eventDb: SELECT * FROM stored_events\nWHERE sequenceNumber > ?
+    activate eventDb
+    eventDb --> eventRepo: List<StoredEvent>
+    deactivate eventDb
+    eventRepo --> projectionEngine: List<StoredEvent> (new events)
+    deactivate eventRepo
+    
+    alt No new events
+        projectionEngine -> projectionEngine: Return early
+    else New events found
+        loop For each StoredEvent
+            projectionEngine -> projectionEngine: Convert to EventEnvelope
+            projectionEngine -> eventMapper: toEvent(EventEnvelope)
+            activate eventMapper
+            eventMapper -> eventMapper: Deserialize JSON payload\nbased on event type
+            eventMapper --> projectionEngine: DomainEvent (typed)
+            deactivate eventMapper
+            
+            projectionEngine -> projectionEngine: apply(DomainEvent)
+            
+            alt OrderPlacedEvent
+                projectionEngine -> projectionEngine: applyOrderPlaced(event)
+                projectionEngine -> orderRepo: save(OrderSummaryView)
+                activate orderRepo
+                orderRepo -> queryDb: INSERT INTO order_summary_view\n(orderId, userId, symbol, status, ...)
+                activate queryDb
+                queryDb --> orderRepo: OrderSummaryView (saved)
+                deactivate queryDb
+                orderRepo --> projectionEngine: OrderSummaryView
+                deactivate orderRepo
+            else OrderCancelledEvent
+                projectionEngine -> projectionEngine: applyOrderCancelled(event)
+                projectionEngine -> orderRepo: findById(orderId)
+                activate orderRepo
+                orderRepo -> queryDb: SELECT * FROM order_summary_view\nWHERE orderId = ?
+                activate queryDb
+                queryDb --> orderRepo: OrderSummaryView
+                deactivate queryDb
+                orderRepo --> projectionEngine: OrderSummaryView
+                projectionEngine -> orderRepo: save(updated view with CANCELLED status)
+                orderRepo -> queryDb: UPDATE order_summary_view\nSET status = 'CANCELLED'
+                activate queryDb
+                queryDb --> orderRepo: Updated
+                deactivate queryDb
+                deactivate orderRepo
+            else OrderFilledEvent
+                projectionEngine -> projectionEngine: applyOrderFilled(event)
+                projectionEngine -> orderRepo: findById(orderId) & update status
+                activate orderRepo
+                orderRepo -> queryDb: UPDATE order_summary_view\nSET status = 'FILLED'
+                activate queryDb
+                queryDb --> orderRepo: Updated
+                deactivate queryDb
+                deactivate orderRepo
+            else PortfolioAdjustedEvent
+                projectionEngine -> projectionEngine: applyPortfolioAdjusted(event)
+                projectionEngine -> portfolioRepo: findByUserIdAndSymbol(userId, symbol)
+                activate portfolioRepo
+                portfolioRepo -> queryDb: SELECT * FROM portfolio_position_view\nWHERE userId = ? AND symbol = ?
+                activate queryDb
+                queryDb --> portfolioRepo: Optional<PortfolioPositionView>
+                deactivate queryDb
+                portfolioRepo --> projectionEngine: Optional<PortfolioPositionView>
+                alt Position exists
+                    projectionEngine -> projectionEngine: Update quantity & average price
+                else New position
+                    projectionEngine -> projectionEngine: Create new PortfolioPositionView
+                end
+                projectionEngine -> portfolioRepo: save(position)
+                portfolioRepo -> queryDb: INSERT/UPDATE portfolio_position_view
+                activate queryDb
+                queryDb --> portfolioRepo: Saved
+                deactivate queryDb
+                deactivate portfolioRepo
+                
+                projectionEngine -> projectionEngine: Update MarketTickerView
+            end
+            
+            projectionEngine -> projectionEngine: Update lastSequenceCached
+        end
+        
+        projectionEngine -> offsetRepo: save(ProjectionOffset)
+        activate offsetRepo
+        offsetRepo -> queryDb: UPDATE projection_offsets\nSET lastSequence = ?
+        activate queryDb
+        queryDb --> offsetRepo: Updated
+        deactivate queryDb
+        offsetRepo --> projectionEngine: Saved
+        deactivate offsetRepo
+    end
+    
+    deactivate projectionEngine
+end
+
+== User Query Request ==
+
+user -> dashboard: View orders/portfolio
+activate dashboard
+dashboard -> orderService: listOrders(userId)
+activate orderService
+orderService -> orderController: GET /api/query/orders?userId=...
+activate orderController
+orderController -> orderRepo: findByUserIdOrderByCreatedAtDesc(userId)
+activate orderRepo
+orderRepo -> queryDb: SELECT * FROM order_summary_view\nWHERE userId = ?\nORDER BY createdAt DESC
+activate queryDb
+queryDb --> orderRepo: List<OrderSummaryView>
+deactivate queryDb
+orderRepo --> orderController: List<OrderSummaryView>
+deactivate orderRepo
+orderController --> orderService: HTTP 200 [OrderSummary[]]
+deactivate orderController
+orderService --> dashboard: Observable<OrderSummary[]>
+deactivate orderService
+
+dashboard -> portfolioService: byUser(userId)
+activate portfolioService
+portfolioService -> portfolioController: GET /api/query/portfolio?userId=...
+activate portfolioController
+portfolioController -> portfolioRepo: findByUserId(userId)
+activate portfolioRepo
+portfolioRepo -> queryDb: SELECT * FROM portfolio_position_view\nWHERE userId = ?
+activate queryDb
+queryDb --> portfolioRepo: List<PortfolioPositionView>
+deactivate queryDb
+portfolioRepo --> portfolioController: List<PortfolioPositionView>
+deactivate portfolioRepo
+portfolioController --> portfolioService: HTTP 200 [PortfolioPosition[]]
+deactivate portfolioController
+portfolioService --> dashboard: Observable<PortfolioPosition[]>
+deactivate portfolioService
+
+dashboard -> dashboard: Render orders & portfolio tables
+dashboard --> user: Display updated data
+deactivate dashboard
+
+note right of queryDb
+  Query views are optimized
+  read models that are:
+  - Fast to query
+  - Denormalized for UI needs
+  - Updated asynchronously
+  - Independent from write model
+end note
+
+@enduml
 ```
-EventProjectionEngine (scheduled)
-  -> StoredEventRepository.findAfter(lastSequence)
-  -> EventMapper.toEvent(envelope)
-  -> apply(event):
-       OrderPlacedEvent      -> OrderSummaryViewRepository.save
-       OrderCancelledEvent   -> update status in summary view
-       OrderFilledEvent      -> update status in summary view
-       PortfolioAdjustedEvent-> PortfolioPositionViewRepository upsert
-                                + MarketTickerViewRepository update
-  -> ProjectionOffsetRepository.save(PROJECTION_NAME, lastSequence)
+
+### 7.3 Cancel Order Command Flow
+
+This diagram shows the cancel order flow, which follows the same event sourcing pattern as placing an order.
+
+```plantuml
+@startuml Cancel Order Command Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+
+actor User as user
+participant "OrdersComponent\n(Angular)" as ordersComp
+participant "OrderService\n(Angular)" as orderService
+participant "OrderCommandController\n(Spring Boot)" as controller
+participant "OrderCommandService\n(Spring Boot)" as commandService
+participant "EventStore\n(Interface)" as eventStore
+participant "JpaEventStore\n(Implementation)" as jpaEventStore
+participant "StoredEventRepository\n(JPA)" as eventRepo
+database "H2 Event Store\n(stored_events table)" as eventDb
+participant "OrderAggregate\n(Domain)" as aggregate
+participant "EventProjectionEngine\n(Scheduled)" as projectionEngine
+participant "OrderSummaryViewRepository\n(JPA)" as orderViewRepo
+database "H2 Query Views" as queryDb
+
+user -> ordersComp: Click cancel button
+activate ordersComp
+ordersComp -> orderService: cancelOrder(orderId)
+activate orderService
+orderService -> controller: DELETE /api/commands/orders/{orderId}
+activate controller
+controller -> controller: Build CancelOrderCommand
+controller -> commandService: handle(CancelOrderCommand)
+activate commandService
+
+commandService -> eventStore: loadEvents(orderId)
+activate eventStore
+eventStore -> jpaEventStore: loadEvents(orderId)
+activate jpaEventStore
+jpaEventStore -> eventRepo: findByAggregateIdOrderBySequenceNumber(orderId)
+activate eventRepo
+eventRepo -> eventDb: SELECT * FROM stored_events\nWHERE aggregateId = ?
+activate eventDb
+eventDb --> eventRepo: List<StoredEvent>
+deactivate eventDb
+eventRepo --> jpaEventStore: List<StoredEvent>
+deactivate eventRepo
+jpaEventStore --> eventStore: List<DomainEvent>
+deactivate jpaEventStore
+eventStore --> commandService: List<DomainEvent>
+deactivate eventStore
+
+commandService -> aggregate: rehydrate(pastEvents)
+activate aggregate
+aggregate -> aggregate: Rebuild state from events
+aggregate --> commandService: OrderAggregate
+deactivate aggregate
+
+commandService -> aggregate: handle(CancelOrderCommand)
+activate aggregate
+aggregate -> aggregate: Validate (check if order can be cancelled)
+aggregate -> aggregate: Create OrderCancelledEvent
+aggregate --> commandService: List<DomainEvent> [OrderCancelledEvent]
+deactivate aggregate
+
+commandService -> eventStore: append(OrderCancelledEvent)
+activate eventStore
+eventStore -> jpaEventStore: append(event)
+activate jpaEventStore
+jpaEventStore -> eventRepo: save(StoredEvent)
+activate eventRepo
+eventRepo -> eventDb: INSERT INTO stored_events\n(OrderCancelledEvent)
+activate eventDb
+eventDb --> eventRepo: StoredEvent
+deactivate eventDb
+eventRepo --> jpaEventStore: StoredEvent
+deactivate eventRepo
+jpaEventStore --> eventStore: EventEnvelope
+deactivate jpaEventStore
+eventStore --> commandService: EventEnvelope
+deactivate eventStore
+
+commandService --> controller: List<EventEnvelope>
+deactivate commandService
+controller --> orderService: HTTP 200 {orderId, events}
+deactivate controller
+orderService --> ordersComp: Observable<CancelResponse>
+deactivate orderService
+ordersComp --> user: Order cancelled
+deactivate ordersComp
+
+== Asynchronous Projection (Background) ==
+
+projectionEngine -> projectionEngine: @Scheduled project() (next cycle)
+activate projectionEngine
+projectionEngine -> eventRepo: findAfter(lastSequence)
+eventRepo -> eventDb: SELECT * FROM stored_events\nWHERE sequenceNumber > ?
+eventDb --> eventRepo: [OrderCancelledEvent]
+eventRepo --> projectionEngine: [OrderCancelledEvent]
+projectionEngine -> eventMapper: toEvent(envelope)
+eventMapper --> projectionEngine: OrderCancelledEvent
+projectionEngine -> orderViewRepo: findById(orderId)
+orderViewRepo -> queryDb: SELECT * FROM order_summary_view\nWHERE orderId = ?
+queryDb --> orderViewRepo: OrderSummaryView
+orderViewRepo --> projectionEngine: OrderSummaryView
+projectionEngine -> orderViewRepo: save(view with status=CANCELLED)
+orderViewRepo -> queryDb: UPDATE order_summary_view\nSET status = 'CANCELLED'
+queryDb --> orderViewRepo: Updated
+orderViewRepo --> projectionEngine: Done
+deactivate projectionEngine
+
+note right of eventDb
+  OrderCancelledEvent persisted
+  Projection engine will update
+  query view in next cycle
+end note
+
+@enduml
 ```
 
 ## 8. Key Classes & Components
