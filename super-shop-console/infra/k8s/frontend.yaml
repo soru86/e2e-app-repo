@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-shell
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend-shell
+  template:
+    metadata:
+      labels:
+        app: frontend-shell
+    spec:
+      containers:
+        - name: frontend-shell
+          image: ghcr.io/acme/super-shop-frontend-shell:latest
+          ports:
+            - containerPort: 4173
+          env:
+            - name: VITE_GRAPHQL_HTTP
+              value: "https://api.super-shop.io/graphql"
+            - name: VITE_KEYCLOAK_URL
+              value: "https://keycloak.super-shop.io/auth"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe-customer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mfe-customer
+  template:
+    metadata:
+      labels:
+        app: mfe-customer
+    spec:
+      containers:
+        - name: mfe-customer
+          image: ghcr.io/acme/super-shop-mfe-customer:latest
+          ports:
+            - containerPort: 4174
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe-admin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mfe-admin
+  template:
+    metadata:
+      labels:
+        app: mfe-admin
+    spec:
+      containers:
+        - name: mfe-admin
+          image: ghcr.io/acme/super-shop-mfe-admin:latest
+          ports:
+            - containerPort: 4175
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-shell
+spec:
+  selector:
+    app: frontend-shell
+  ports:
+    - port: 80
+      targetPort: 4173
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: super-shop-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: app.super-shop.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-shell
+                port:
+                  number: 80
+    - host: api.super-shop.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-gateway
+                port:
+                  number: 80
+
+

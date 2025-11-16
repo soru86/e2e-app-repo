@@ -1,0 +1,7 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { clsx } from "clsx";
+export function DataTable({ columns, rows, emptyState = "No data" }) {
+    const hasRows = rows.length > 0;
+    return (_jsx("div", { className: "panel-surface overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700", children: _jsxs("table", { className: "min-w-full divide-y divide-slate-200 dark:divide-slate-700", children: [_jsx("thead", { className: "bg-slate-50 dark:bg-slate-800", children: _jsx("tr", { children: columns.map((column) => (_jsx("th", { className: clsx("px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500", column.className), children: column.header }, String(column.key)))) }) }), _jsxs("tbody", { className: "divide-y divide-slate-100 dark:divide-slate-800", children: [!hasRows && (_jsx("tr", { children: _jsx("td", { colSpan: columns.length, className: "px-4 py-6 text-center text-sm text-slate-500", children: emptyState }) })), hasRows &&
+                            rows.map((row, idx) => (_jsx("tr", { className: "hover:bg-slate-50/80 dark:hover:bg-slate-800/80", children: columns.map((column) => (_jsx("td", { className: clsx("px-4 py-3 text-sm text-slate-700 dark:text-slate-200", column.className), children: column.render ? column.render(row[column.key], row) : row[column.key] }, `${String(column.key)}-${idx}`))) }, idx)))] })] }) }));
+}

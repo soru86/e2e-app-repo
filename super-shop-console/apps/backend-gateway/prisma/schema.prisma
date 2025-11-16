@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      String
+  orders    Order[]
+  issues    Issue[]
+  createdAt DateTime @default(now())
+}
+
+model InventoryItem {
+  id               String   @id @default(uuid())
+  sku              String   @unique
+  name             String
+  stock            Int
+  reorderThreshold Int
+  createdAt        DateTime @default(now())
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  status      String
+  total       Float
+  customer    User     @relation(fields: [customerId], references: [id])
+  customerId  String
+  createdAt   DateTime @default(now())
+}
+
+model Issue {
+  id          String   @id @default(uuid())
+  status      String
+  category    String
+  description String
+  customer    User     @relation(fields: [customerId], references: [id])
+  customerId  String
+  createdAt   DateTime @default(now())
+}
+
+model DiscountRule {
+  id        String   @id @default(uuid())
+  label     String
+  type      String
+  value     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+

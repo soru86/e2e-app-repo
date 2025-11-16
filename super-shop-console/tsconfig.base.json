@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": [
+      "ES2021",
+      "DOM"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@theme/*": [
+        "packages/theme/src/*"
+      ],
+      "@ui/*": [
+        "packages/ui/src/*"
+      ],
+      "@config/*": [
+        "packages/config/src/*"
+      ],
+      "@graphql-client": [
+        "packages/graphql-client/src/index"
+      ],
+      "@super-shop/shared-types": [
+        "packages/shared-types/src/index"
+      ],
+      "@state/*": [
+        "packages/state/src/*"
+      ],
+      "@super-shop/ui": [
+        "packages/ui/src/index"
+      ],
+      "@super-shop/config": [
+        "packages/config/src/index"
+      ],
+      "@super-shop/graphql-client": [
+        "packages/graphql-client/src/index"
+      ],
+      "@super-shop/theme": [
+        "packages/theme/src/index"
+      ],
+      "@super-shop/state": [
+        "packages/state/src/index"
+      ]
+    }
+  }
+}

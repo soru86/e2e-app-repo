@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+  - infra/*
+
+onlyBuiltDependencies:
+  - '@apollo/protobufjs'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma

@@ -1,0 +1,18 @@
+{
+  "name": "@super-shop/state",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.2.3",
+    "react-redux": "^9.1.2",
+    "@super-shop/shared-types": "workspace:*"
+  }
+}
+

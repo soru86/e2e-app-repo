@@ -1,0 +1,23 @@
+{
+  "name": "super-shop-console",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Super Shop Console monorepo with microfrontends, GraphQL backend, and infra assets.",
+  "engines": {
+    "node": ">=18.18.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo dev --concurrency=20",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "format": "turbo format"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.25",
+    "turbo": "^2.0.6",
+    "typescript": "^5.4.5"
+  },
+  "packageManager": "pnpm@10.22.0"
+}

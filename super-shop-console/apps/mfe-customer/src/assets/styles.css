@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #e5e7eb;
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+.dark body {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.panel-surface {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  color: inherit;
+}
+
+.dark .panel-surface {
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.45);
+}
+
+.customer-shell {
+  width: 100%;
+  min-height: 100%;
+  color: inherit;
+}
+
+.customer-shell--standalone {
+  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.15), transparent 60%), #e5e7eb;
+  padding-bottom: 4rem;
+}
+
+.dark .customer-shell--standalone {
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 55%), #0f172a;
+}
+
+.customer-shell__inner {
+  width: 100%;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 2rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.customer-shell__inner--embedded {
+  max-width: 100%;
+  padding: 1rem;
+  gap: 1.5rem;
+}
+
+.customer-shell__header {
+  border-radius: 1.75rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.customer-shell__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.customer-shell__hero h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.customer-shell__hero p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.dark .customer-shell__hero p {
+  color: #cbd5f5;
+}
+
+.customer-shell__eyebrow {
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  color: rgba(30, 41, 59, 0.6);
+  margin-bottom: 0.35rem;
+}
+
+.dark .customer-shell__eyebrow {
+  color: rgba(248, 250, 252, 0.75);
+}
+
+.customer-shell__logout {
+  border: 1px solid rgba(248, 250, 252, 0.25);
+  border-radius: 999px;
+  padding: 0.4rem 1.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f8fafc;
+  background: transparent;
+  letter-spacing: 0.05em;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.customer-shell__logout:hover {
+  border-color: rgba(248, 250, 252, 0.5);
+  color: #fff;
+}
+
+.customer-shell__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin: 1.5rem -0.5rem 0.5rem;
+  padding: 0.5rem 0.5rem 0.25rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.dark .customer-shell__nav {
+  border-top-color: rgba(248, 250, 252, 0.08);
+}
+
+.customer-shell__nav-button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: rgba(15, 23, 42, 0.08);
+  color: rgba(15, 23, 42, 0.75);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.customer-shell__nav-button:hover {
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.customer-shell__nav-button--active {
+  background: linear-gradient(120deg, #2563eb, #3b82f6);
+  color: #f8fafc;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+}
+
+.dark .customer-shell__nav-button {
+  background: rgba(248, 250, 252, 0.06);
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.dark .customer-shell__nav-button--active {
+  background: linear-gradient(120deg, #f97316, #fb923c);
+  color: #0f172a;
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.45);
+}
+
+.customer-shell__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.customer-shell--embedded .panel-surface {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.customer-shell--embedded .customer-shell__inner {
+  gap: 1.25rem;
+}
+
+.customer-shell--embedded .customer-shell__header {
+  padding: 1.5rem;
+}
+
+input,
+select,
+textarea {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(3, 7, 18, 0.85);
+  color: #f8fafc;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(226, 232, 240, 0.7);
+}
+
+@media (min-width: 1024px) {
+  .customer-shell__inner {
+    padding: 2.5rem 3rem;
+    gap: 2rem;
+  }
+
+  .customer-shell__header {
+    flex-direction: column;
+  }
+
+  .customer-shell__body {
+    gap: 2.25rem;
+  }
+}
+
