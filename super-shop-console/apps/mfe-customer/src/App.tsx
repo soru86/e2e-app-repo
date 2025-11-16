@@ -46,7 +46,7 @@ export default function CustomerApp({ basePath = "", location, navigate }: Custo
   }, []);
 
   if (embeddedInShell) {
-    return <CustomerShell basePath={basePath} onLogout={() => {}} router={{ location: location!, navigate: navigate! }} />;
+    return <CustomerShell basePath={basePath} onLogout={() => { }} router={{ location: location!, navigate: navigate! }} />;
   }
 
   const loginPath = basePath ? `${basePath}/login` : "/login";
@@ -130,7 +130,7 @@ function CustomerShell({ basePath, onLogout, router }: CustomerShellProps) {
   const header = (
     <header className="customer-shell__header panel-surface">
       <div className="customer-shell__hero">
-        <div>
+        <div className="customer-shell__hero-text">
           <p className="customer-shell__eyebrow">Super Shop</p>
           <h2>Customer Portal</h2>
           <p>Orders, payments, and support history in one place.</p>
@@ -141,12 +141,14 @@ function CustomerShell({ basePath, onLogout, router }: CustomerShellProps) {
           </button>
         )}
       </div>
-      <NavBar
-        embeddedInShell={embeddedInShell}
-        activePath={normalizedRelativePath}
-        onNavigate={router?.navigate}
-        buildHref={buildHref}
-      />
+      <div className="customer-shell__nav-wrapper">
+        <NavBar
+          embeddedInShell={embeddedInShell}
+          activePath={normalizedRelativePath}
+          onNavigate={router?.navigate}
+          buildHref={buildHref}
+        />
+      </div>
     </header>
   );
 
@@ -309,28 +311,32 @@ function Orders({ data }: { data?: OrderRow[] }) {
         ]}
         rows={rows}
       />
-      <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-sm shadow-sm dark:border-orange-500/20 dark:bg-[#111827]">
-        <h3 className="font-semibold text-slate-900 dark:text-slate-50">Place a new order</h3>
+      <div className="panel-surface mt-6 rounded-3xl border border-slate-200/70 px-5 py-4 text-sm shadow-lg shadow-slate-950/5 dark:border-orange-500/25">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-orange-50">Place a new order</h3>
         <div className="mt-3 flex flex-wrap gap-3">
           <label className="flex flex-1 min-w-[160px] flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-orange-100">SKU</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-orange-100">
+              SKU
+            </span>
             <input
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 dark:border-orange-500/40 dark:bg-[#0c0c0c] dark:text-orange-50"
+              className="rounded-2xl border border-slate-200/70 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-orange-500/35 dark:bg-slate-900/60 dark:text-orange-50 dark:focus:border-orange-400 dark:focus:ring-orange-400/30"
               value={sku}
               onChange={(event) => setSku(event.target.value)}
             />
           </label>
           <label className="flex flex-1 min-w-[140px] flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-orange-100">Amount</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-orange-100">
+              Amount
+            </span>
             <input
               type="number"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 dark:border-orange-500/40 dark:bg-[#0c0c0c] dark:text-orange-50"
+              className="rounded-2xl border border-slate-200/70 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-orange-500/35 dark:bg-slate-900/60 dark:text-orange-50 dark:focus:border-orange-400 dark:focus:ring-orange-400/30"
               value={amount}
               onChange={(event) => setAmount(Number(event.target.value))}
             />
           </label>
           <button
-            className="self-end rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800 dark:bg-orange-500 dark:text-slate-900 dark:hover:bg-orange-400"
+            className="self-end rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:bg-orange-500 dark:text-slate-900 dark:hover:bg-orange-400 dark:focus-visible:outline-orange-400"
             onClick={() => alert(`Order placed for ${sku} worth $${amount}`)}
           >
             Place order
@@ -370,22 +376,26 @@ function Payments({ data }: { data?: PaymentRow[] }) {
         ]}
         rows={rows}
       />
-      <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-sm shadow-sm dark:border-orange-500/20 dark:bg-[#111827]">
-        <h3 className="font-semibold text-slate-900 dark:text-slate-50">Quick payment</h3>
+      <div className="panel-surface mt-6 rounded-3xl border border-slate-200/70 px-5 py-4 text-sm shadow-lg shadow-slate-950/5 dark:border-orange-500/25">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-orange-50">Quick payment</h3>
         <div className="mt-3 flex flex-wrap gap-3">
           <label className="flex flex-1 min-w-[140px] flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-orange-100">Amount</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-orange-100">
+              Amount
+            </span>
             <input
               type="number"
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 dark:border-orange-500/40 dark:bg-[#0c0c0c] dark:text-orange-50"
+              className="rounded-2xl border border-slate-200/70 bg-white/95 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-orange-500/35 dark:bg-slate-900/60 dark:text-orange-50 dark:focus:border-orange-400 dark:focus:ring-orange-400/30"
               value={amount}
               onChange={(event) => setAmount(Number(event.target.value))}
             />
           </label>
           <label className="flex flex-1 min-w-[160px] flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-orange-100">Method</span>
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-orange-100">
+              Method
+            </span>
             <select
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 dark:border-orange-500/40 dark:bg-[#0c0c0c] dark:text-orange-50"
+              className="rounded-2xl border border-slate-200/70 bg-white/95 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-orange-500/35 dark:bg-slate-900/60 dark:text-orange-50 dark:focus:border-orange-400 dark:focus:ring-orange-400/30"
               value={method}
               onChange={(event) => setMethod(event.target.value)}
             >
@@ -395,7 +405,7 @@ function Payments({ data }: { data?: PaymentRow[] }) {
             </select>
           </label>
           <button
-            className="self-end rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800 dark:bg-orange-500 dark:text-slate-900 dark:hover:bg-orange-400"
+            className="self-end rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:bg-orange-500 dark:text-slate-900 dark:hover:bg-orange-400 dark:focus-visible:outline-orange-400"
             onClick={() => alert(`Processing ${method} payment of $${amount}`)}
           >
             Pay now
