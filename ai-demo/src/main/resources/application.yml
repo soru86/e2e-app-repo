@@ -1,0 +1,38 @@
+server:
+  port: 8080
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+spring:
+  application:
+    name: code-analyzer-ai-demo
+  servlet:
+    multipart:
+      enabled: true
+
+ollama:
+  base-url: http://localhost:11434
+  model: codellama
+  timeout: 600000
+
+app:
+  upload:
+    dir: ./uploads
+    temp-dir: ./temp
+  github:
+    timeout: 60000
+  image:
+    output-dir: ./generated-images
+  code:
+    max-content-size: 50000
+    max-files: 50
+    max-file-size: 10000
+
+logging:
+  level:
+    root: INFO
+    com.aidemo: DEBUG
+    dev.langchain4j: DEBUG
+
